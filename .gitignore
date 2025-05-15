@@ -1,0 +1,27 @@
+# Python virtual environment
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Data science
+.ipynb_checkpoints/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+
+# Cursor AI project files
+.cursor/
+cursorrules.mdc
+
+# Data (optional: keep only .gitkeep in empty folders)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep 
