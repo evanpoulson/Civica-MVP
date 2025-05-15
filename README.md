@@ -21,10 +21,16 @@ Civica-MVP/
 │   └── processed/   # Cleaned/processed files
 ├── requirements.txt
 ├── src/
-│   ├── api/         # FastAPI endpoints
-│   ├── core/        # Core simulation logic
-│   ├── data/        # Data ingestion/cleaning scripts
-│   └── frontend/    # Streamlit UI code
+│   ├── data_processing/  # Data processing and validation logic
+│   │   ├── processor.py  # Main data processing pipeline
+│   │   ├── validators.py # Data validation utilities
+│   │   ├── utils.py      # Helper functions
+│   │   ├── config.py     # Configuration settings
+│   │   ├── reporting.py  # Data quality reporting
+│   │   └── spatial.py    # Spatial operations
+│   ├── core/        # Core simulation logic (to be implemented)
+│   ├── api/         # FastAPI endpoints (to be implemented)
+│   └── frontend/    # Streamlit UI code (to be implemented)
 ├── tests/           # Unit and integration tests
 └── venv/            # Python virtual environment
 ```
