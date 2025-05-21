@@ -1,7 +1,5 @@
 """
-Main package for the Civica project.
+Civica MVP Project
 """
 
-from processor import CalgaryDataProcessor
-
-__all__ = ['CalgaryDataProcessor'] 
+__version__ = "0.1.0" 
