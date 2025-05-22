@@ -92,6 +92,35 @@ def save_processed_data(gdf: gpd.GeoDataFrame, filename: str):
     gdf.to_file(output_path, driver='GeoJSON')
     logger.info(f"Saved {filename} to {output_path}")
 
+def spatial_join_parcels_districts(parcels: gpd.GeoDataFrame, districts: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Perform a spatial join between parcels and districts dataframes.
+    
+    Args:
+        parcels: GeoDataFrame containing parcel boundaries (left dataframe)
+        districts: GeoDataFrame containing land use districts (right dataframe)
+        
+    Returns:
+        gpd.GeoDataFrame: Joined GeoDataFrame with parcel data and corresponding district information
+    """
+    # Ensure both dataframes are in the same CRS
+    if parcels.crs != districts.crs:
+        districts = districts.to_crs(parcels.crs)
+    
+    # Perform spatial join
+    joined_gdf = gpd.sjoin(
+        parcels,
+        districts,
+        how='left',
+        predicate='within'
+    )
+    
+    # Drop the index_right column created by the spatial join
+    if 'index_right' in joined_gdf.columns:
+        joined_gdf = joined_gdf.drop(columns=['index_right'])
+    
+    return joined_gdf
+
 if __name__ == "__main__":
     try:
         # Get the land use data
@@ -115,6 +144,13 @@ if __name__ == "__main__":
         # Save processed datasets
         save_processed_data(districts, "land_use_districts")
         save_processed_data(parcels, "parcel_boundaries")
+        
+        # Perform spatial join
+        joined_data = spatial_join_parcels_districts(parcels, districts)
+        logger.info(f"Created spatial join with {len(joined_data)} rows")
+        
+        # Save joined dataset
+        save_processed_data(joined_data, "parcels_with_districts")
         
         logger.info("Data processing completed successfully!")
         
