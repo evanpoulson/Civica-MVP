@@ -13,7 +13,7 @@ import geopandas as gpd
 import requests
 from pathlib import Path
 import matplotlib.pyplot as plt
-from data_processing.data_manager import DataManager
+from .data_manager import DataManager
 
 def get_land_use_data():
     """
