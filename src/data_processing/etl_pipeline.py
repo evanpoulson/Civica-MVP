@@ -62,7 +62,7 @@ def filter_parcel_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         gpd.GeoDataFrame: Filtered GeoDataFrame with only essential columns
     """
     essential_columns = ['land_size_sm', 'property_type', 'unique_key', 'comm_name', 
-                        'sub_property_use', 'address', 'geometry']
+                        'sub_property_use', 'address', 'geometry', 'land_use_designation']
     return gdf[essential_columns]
 
 def get_parcel_data():
@@ -97,10 +97,20 @@ if __name__ == "__main__":
         # Get the land use data
         districts = get_land_use_data()
         logger.info(f"Processed land use districts dataset with {len(districts)} rows")
+        logger.info(f"Land use districts CRS: {districts.crs}")
         
         # Get the parcel boundaries data
         parcels = get_parcel_data()
         logger.info(f"Processed parcel boundaries dataset with {len(parcels)} rows")
+        logger.info(f"Parcel boundaries CRS: {parcels.crs}")
+        
+        # Verify both datasets have the same CRS
+        if districts.crs != parcels.crs:
+            logger.warning("CRS mismatch between datasets!")
+            logger.warning(f"Land use districts CRS: {districts.crs}")
+            logger.warning(f"Parcel boundaries CRS: {parcels.crs}")
+        else:
+            logger.info(f"Both datasets using CRS: {districts.crs}")
         
         # Save processed datasets
         save_processed_data(districts, "land_use_districts")
