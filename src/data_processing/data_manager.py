@@ -1,3 +1,11 @@
+"""
+Data Manager for Civica Calgary Zoning Simulation
+
+This module handles data acquisition and caching for the simulation.
+It provides methods to fetch and cache geospatial data from Calgary's Open Data Portal,
+ensuring data is in the correct coordinate system and efficiently cached.
+"""
+
 import geopandas as gpd
 import requests
 import io
@@ -5,32 +13,51 @@ from pathlib import Path
 import datetime
 
 class DataManager:
+    # API endpoint for Calgary's land use districts data
     LAND_USE_DISTRICTS_URL = "https://data.calgary.ca/resource/qe6k-p9nh.geojson?$limit=20000"
+    
+    # Path where the cached data will be stored
     CACHED_DISTRICTS_FILE_PATH = Path("data/raw/land_use_districts.geojson")
+    
+    # Number of days before cached data is considered stale
     CACHE_EXPIRY_DAYS = 7
-    TARGET_CRS = "EPSG:3400"  # Calgary's standard CRS (UTM Zone 12N)
+    
+    # Target coordinate reference system (UTM Zone 12N - Calgary's standard)
+    TARGET_CRS = "EPSG:3400"
 
     @classmethod
     def get_districts(cls):
+        """
+        Fetches land use districts data, using cached data if available and not stale.
+        
+        Returns:
+            geopandas.GeoDataFrame: Land use districts data in the target CRS (EPSG:3400)
+        """
+        # Check if we have a cached file that's not too old
         if cls.CACHED_DISTRICTS_FILE_PATH.exists():
             file_modification_time = datetime.datetime.fromtimestamp(cls.CACHED_DISTRICTS_FILE_PATH.stat().st_mtime)
             if (datetime.datetime.now() - file_modification_time).days < cls.CACHE_EXPIRY_DAYS:
+                # Load from cache and verify CRS
                 geodataframe = gpd.read_file(str(cls.CACHED_DISTRICTS_FILE_PATH))
-                # Verify CRS is correct
                 if geodataframe.crs != cls.TARGET_CRS:
                     geodataframe = geodataframe.to_crs(cls.TARGET_CRS)
                 return geodataframe
 
-        # otherwise fetch fresh
+        # If no valid cache exists, fetch fresh data from the API
         response = requests.get(cls.LAND_USE_DISTRICTS_URL)
-        response.raise_for_status()
+        response.raise_for_status()  # Raise exception for bad status codes
+        
+        # Convert API response to GeoDataFrame
         geodataframe = gpd.read_file(response.text)
         
-        # Set source CRS (WGS84) and transform to target CRS
+        # Ensure data is in the correct coordinate system
+        # First set the source CRS (WGS84) and then transform to target CRS
         geodataframe.set_crs(epsg=4326, inplace=True)
         geodataframe = geodataframe.to_crs(cls.TARGET_CRS)
         
+        # Save to cache for future use
         cls.CACHED_DISTRICTS_FILE_PATH.parent.mkdir(exist_ok=True)
         geodataframe.to_file(str(cls.CACHED_DISTRICTS_FILE_PATH), driver="GeoJSON")
+        
         return geodataframe
     
